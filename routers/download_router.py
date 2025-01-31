@@ -1,4 +1,5 @@
 from fastapi.responses import FileResponse
+from fastapi import APIRouter
 import os
 from config import MODEL_DIR
 

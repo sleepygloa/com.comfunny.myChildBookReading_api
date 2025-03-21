@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import upload_router, train_router, convert_router, download_router, health
+from routers import upload_router, train_router, convert_router, download_router, health, download_coreml_model
 
 app = FastAPI(title="MyChildBookReading Voice Training API")
 
@@ -8,6 +8,7 @@ app.include_router(upload_router.router)
 app.include_router(train_router.router)
 app.include_router(convert_router.router)
 app.include_router(download_router.router)
+app.include_router(download_coreml_model.router)
 app.include_router(health.router)
 
 if __name__ == "__main__":

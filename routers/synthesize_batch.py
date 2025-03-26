@@ -30,7 +30,7 @@ async def synthesize_batch(
         return {"error": f"JSON 파싱 오류: {str(e)}"}
 
     # 모델 저장
-    model_dir = f"./temp_models/{user_id}"
+    model_dir = f"./{user_id}"
     os.makedirs(model_dir, exist_ok=True)
     model_path = os.path.join(model_dir, model_file.filename)
 

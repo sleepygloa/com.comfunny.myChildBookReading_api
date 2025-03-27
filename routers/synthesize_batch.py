@@ -1,27 +1,30 @@
-# ✅ FastAPI 서버에서 클라이언트에게 JSON 리스트를 반환하는 형태로 수정
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import APIRouter, UploadFile, File, Form
 from pydantic import BaseModel
 from typing import List
 import os
 import json
-from utils.tts_engine import synthesize_with_model  # 사용자가 구현할 함수
+from utils.tts_engine import synthesize_with_model  # 음성합성 함수
 
-app = FastAPI()
+# ✅ FastAPI 라우터 객체 생성
+router = APIRouter()
 
+# ✅ 파일명 지정 딕셔너리
 AUDIO_FILENAME = {
     "father": "audio_father_AI.m4a",
     "mother": "audio_mother_AI.m4a"
 }
 
+# ✅ 요청 데이터 모델
 class TTSRequest(BaseModel):
     folderName: str
     text: str
 
-@app.post("/synthesize_batch/")
+# ✅ 음성합성 라우터
+@router.post("/synthesize_batch/")
 async def synthesize_batch(
     user_id: str = Form(...),
-    voice_type: str = Form(...),  # "father" or "mother"
-    requests: str = Form(...),  # JSON 문자열
+    voice_type: str = Form(...),
+    requests: str = Form(...),
     model_file: UploadFile = File(...)
 ):
     try:
@@ -29,17 +32,18 @@ async def synthesize_batch(
     except Exception as e:
         return {"error": f"JSON 파싱 오류: {str(e)}"}
 
-    # 모델 저장
+    # 모델 저장 경로 설정
     model_dir = f"./{user_id}"
     os.makedirs(model_dir, exist_ok=True)
     model_path = os.path.join(model_dir, model_file.filename)
 
+    # 모델 저장
     with open(model_path, "wb") as f:
         f.write(await model_file.read())
 
     result_folders = []
 
-    # 각 요청에 대해 synthesize 처리
+    # 각 요청에 대해 음성 합성 처리
     for item in req_list:
         folder_path = os.path.join("backup", user_id, item.folderName)
         os.makedirs(folder_path, exist_ok=True)

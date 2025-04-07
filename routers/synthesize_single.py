@@ -19,11 +19,12 @@ AUDIO_FILENAME = {
     "mother": "audio_mother_AI.m4a"
 }
 
-@router.post("/synthesize_batch/")
-async def synthesize_batch(
+@router.post("/synthesize_single/")
+async def synthesize_single(
     user_id: str = Form(...),
     voice_type: str = Form(...),
-    requests: str = Form(...),
+    folder_name: str = Form(...),
+    text: str = Form(...),
     model_url: str = Form(...)
 ):
     try:
@@ -40,27 +41,12 @@ async def synthesize_batch(
     except Exception as e:
         return {"error": f"모델 다운로드 실패: {str(e)}"}
 
-    # ZIP 압축 준비
-    zip_buffer = BytesIO()
-    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
-        for idx, item in enumerate(req_list):
-            try:
-                audio_bytes = synthesize_to_memory(text=item.text, model_path=tmp_model_path)
 
-                # 폴더명을 파일명으로 사용, 예: page1/audio_mother_AI.m4a
-                filename = f"{item.folderName}/{AUDIO_FILENAME[voice_type]}"
-                zipf.writestr(filename, audio_bytes)
-            except Exception as e:
-                print(f"❌ 변환 실패: {item.folderName} - {e}")
-                continue
+    audio_bytes = synthesize_to_memory(text=text, model_path=tmp_model_path)
 
-    # 모델 삭제
-    os.remove(tmp_model_path)
-
-    # ZIP 반환
-    zip_buffer.seek(0)
-    return FileResponse(
-        path_or_file=zip_buffer,
-        media_type="application/zip",
-        filename="voices.zip"
-    )
+    # 폴더명을 파일명으로 사용, 예: page1/audio_mother_AI.m4a
+    filename = f"{folderName}/{AUDIO_FILENAME[voice_type]}"
+    # synthesize_to_memory → m4a 바이너리 생성 후 리턴
+    audio_bytes = synthesize_to_memory(text=text, model_path=model_path)
+    return Response(content=audio_bytes, media_type='audio/m4a')
+    # zipf.writestr(filename, audio_bytes)

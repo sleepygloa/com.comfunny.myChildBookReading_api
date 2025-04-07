@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import upload_router, train_router, convert_router, download_router, health, synthesize_batch
+from routers import upload_router, train_router, convert_router, download_router, health, synthesize_batch, synthesize_single
 
 app = FastAPI(title="MyChildBookReading Voice Training API")
 
@@ -10,6 +10,7 @@ app.include_router(convert_router.router)
 app.include_router(download_router.router)
 app.include_router(health.router)
 app.include_router(synthesize_batch.router)
+app.include_router(synthesize_single.router)
 
 if __name__ == "__main__":
     import uvicorn
